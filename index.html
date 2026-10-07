@@ -1,0 +1,22 @@
+<!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
+<title>SecureShare</title><link rel=stylesheet href=/static/style.css>
+<main>
+<header><span class=kicker>SECURESHARE / ACCESS LEDGER</span><h1>Files in your custody</h1>
+<p>Hashing, signing and AES-256 encryption happen in this browser. The server only ever receives ciphertext.</p></header>
+<section id=auth class=card style="margin-top:16px">
+ <input id=user placeholder=username autocomplete=username><input id=pw type=password placeholder="password (8+ chars)" autocomplete=current-password>
+ <button id=login>Log in</button><button id=register class=alt>Register</button><div id=authmsg class=msg></div>
+ <p class=n>Registering generates two RSA-2048 key pairs in this browser and stores the private keys, encrypted with your password, in local storage.</p>
+</section>
+<section id=app hidden>
+ <div class=bar><span id=who class=kicker></span><button id=logout class=alt>Log out</button></div>
+ <div class=grid>
+  <section class=card><h2>Send a file</h2>
+   <input id=to placeholder="recipient username"><select id=mode><option>GCM<option>CBC</select>
+   <input id=file type=file><button id=send>Encrypt &amp; send</button><div id=sendmsg class=msg></div><pre id=pipe></pre></section>
+  <section class=card><h2>Ledger <button id=refresh class=alt>Refresh</button></h2><div id=dlmsg class=msg></div>
+   <table><thead><tr><th>ID<th>FILE<th>FROM &rarr; TO<th>MODE<th>CHECKS<th></thead><tbody id=rows></tbody></table>
+   <p class=n>Received files are fully verified here: decrypt, recompute SHA-256, compare with the original, verify the sender's signature. Sent files show the server's at-rest checks.</p></section>
+ </div>
+</section></main>
+<script src=/static/securecrypto.js></script><script src=/static/app.js></script></html>

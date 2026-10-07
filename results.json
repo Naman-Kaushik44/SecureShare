@@ -1,0 +1,128 @@
+{
+  "tests": [
+    {
+      "test": "T1 Wireshark-style capture: plaintext baseline",
+      "expected": "file contents readable on the wire",
+      "observed": "marker found in 28755 captured bytes: True",
+      "passed": true
+    },
+    {
+      "test": "T2 capture of SecureShare traffic",
+      "expected": "only ciphertext visible; no plaintext on the wire",
+      "observed": "plaintext found in 82156 captured bytes: False; round-trip verdict: Verified",
+      "passed": true
+    },
+    {
+      "test": "T2b server storage at rest",
+      "expected": "stored blob is ciphertext",
+      "observed": "plaintext marker in stored file: False",
+      "passed": true
+    },
+    {
+      "test": "T3 random 1-bit ciphertext flips (AES-GCM)",
+      "expected": "50/50 flagged 'File Tampered'",
+      "observed": "50/50 flagged (0 by SHA-256 mismatch, 50 by cipher auth/padding failure)",
+      "passed": true
+    },
+    {
+      "test": "T3 random 1-bit ciphertext flips (AES-CBC)",
+      "expected": "50/50 flagged 'File Tampered'",
+      "observed": "50/50 flagged (50 by SHA-256 mismatch, 0 by cipher auth/padding failure)",
+      "passed": true
+    },
+    {
+      "test": "T3b same bit flips against plaintext baseline",
+      "expected": "tampering goes unnoticed (0% detection)",
+      "observed": "50/50 downloads silently corrupted, 0 alerts raised",
+      "passed": true
+    },
+    {
+      "test": "T4 modified hash record in database",
+      "expected": "'File Tampered' (Original SHA-256 != Received SHA-256)",
+      "observed": "File Tampered - Original SHA-256 != Received SHA-256; signature_ok=False",
+      "passed": true
+    },
+    {
+      "test": "T5 unauthorized access",
+      "expected": "no token -> 401; forged token -> 401; other user -> 403; bad password -> 401",
+      "observed": "401; 401; 403; 401",
+      "passed": true
+    },
+    {
+      "test": "T5b brute-force lockout",
+      "expected": "6th attempt throttled (429)",
+      "observed": "status codes [401, 401, 401, 401, 401, 429]",
+      "passed": true
+    },
+    {
+      "test": "T6a upload signed with unregistered key",
+      "expected": "server rejects (400 invalid digital signature)",
+      "observed": "400 {'error': 'invalid digital signature'}",
+      "passed": true
+    },
+    {
+      "test": "T6b signature swapped for attacker's at rest",
+      "expected": "recipient rejects: sender authenticity fails",
+      "observed": "Signature Invalid (hash_ok=True, sig_ok=False)",
+      "passed": true
+    },
+    {
+      "test": "T6c unverified file is never written to disk",
+      "expected": "no output file for forged file",
+      "observed": "saved_to present: False",
+      "passed": true
+    }
+  ],
+  "bench": [
+    {
+      "size_kb": 10,
+      "sha256_ms": 0.014599994756281376,
+      "enc_GCM_ms": 0.006580003537237644,
+      "dec_GCM_ms": 0.0072599854320287704,
+      "enc_CBC_ms": 0.026240036822855473,
+      "dec_CBC_ms": 0.01268000341951847
+    },
+    {
+      "size_kb": 100,
+      "sha256_ms": 0.0869800103828311,
+      "enc_GCM_ms": 0.022280006669461727,
+      "dec_GCM_ms": 0.019279983825981617,
+      "enc_CBC_ms": 0.1654599793255329,
+      "dec_CBC_ms": 0.04197999369353056
+    },
+    {
+      "size_kb": 1024,
+      "sha256_ms": 0.8600000059232116,
+      "enc_GCM_ms": 0.5828999681398273,
+      "dec_GCM_ms": 0.6162999896332622,
+      "enc_CBC_ms": 2.7095199562609196,
+      "dec_CBC_ms": 1.5513999853283167
+    },
+    {
+      "size_kb": 5120,
+      "sha256_ms": 4.411833321986099,
+      "enc_GCM_ms": 2.3765666410326958,
+      "dec_GCM_ms": 2.3387333300585547,
+      "enc_CBC_ms": 13.250100038324794,
+      "dec_CBC_ms": 7.5229999686901765
+    }
+  ],
+  "asym": {
+    "rsa_sign_ms": 0.3819199977442622,
+    "rsa_verify_ms": 0.05421999376267195,
+    "key_wrap_ms": 0.05245000356808305,
+    "key_unwrap_ms": 0.41378000751137733
+  },
+  "e2e": [
+    {
+      "size_kb": 100,
+      "baseline_ms": 17.63316666862617,
+      "secureshare_ms": 42.20679999950031
+    },
+    {
+      "size_kb": 1024,
+      "baseline_ms": 31.261500009956457,
+      "secureshare_ms": 90.19556664861739
+    }
+  ]
+}
